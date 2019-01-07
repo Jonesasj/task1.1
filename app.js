@@ -3,6 +3,8 @@ const app = express();
 const port = 3000;
 const path = require('path');
 const https = require('https');
+const querystring = require('querystring');
+const url = require('url');
 
 const CLIENT_ID = '3MVG9fTLmJ60pJ5KsAIY_SDssNp.LJMszR8cxFmXCR45fR..1Xi.sv0jjao4BRSkjUcKQyEeKq8t7Yko_07xB';
 const CLIENT_SECRET_ID = '5771926701866322237';
@@ -81,7 +83,43 @@ app.get('/oauth-token', function(req, res) {
 
 app.get('/accounts', (req, res) => {
 
-    console.log(token);   
+    let myURL = new URL(token.instance_url);
+
+    let query = querystring.stringify({q : "SELECT name from Account"});
+    console.log(query);
+    let options = {
+        protocol : 'https:',
+        host : myURL.host,
+        method : 'GET',
+        headers : {
+            'Content-Type' : 'application/json',
+            Authorization : token.token_type + ' ' + token.access_token
+        },
+        //auth : token.token_type + ' ' + token.access_token,
+        path : '/services/data/v44.0/query/?' + query
+    }
+    console.log(options);
+
+
+    let request = https.request(options, function(response) {
+        console.log(`STATUS: ${response.statusCode}`);
+        console.log(`HEADERS: ${JSON.stringify(response.headers)}`);
+        response.setEncoding('utf8');
+        response.on('data', (data) => {
+            console.log(`BODY: ${data}`);
+        });
+        response.on('end', () => {
+            console.log('No more data in response');
+        });
+    });
+
+    request.on('error', (e) => {
+        console.error(`problem with request: ${e.message}`);
+    });
+
+    request.end()
+    res.send("here");
+    
 
 });
 
