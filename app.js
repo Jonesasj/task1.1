@@ -74,12 +74,12 @@ app.get('/oauth-redirect', function(req, res) {
 
     request.write(data);
     request.end();
-    res.send("1");
+    res.send("Oauth Redirect");
 });
 
-app.get('/oauth-token', function(req, res) {
+/*app.get('/oauth-token', function(req, res) {
     res.send("2");
-});
+});*/
 
 app.get('/accounts', (req, res) => {
 
@@ -100,6 +100,8 @@ app.get('/accounts', (req, res) => {
     }
     console.log(options);
 
+    let accountString = "";
+    let accounts = {};
 
     let request = https.request(options, function(response) {
         console.log(`STATUS: ${response.statusCode}`);
@@ -107,9 +109,13 @@ app.get('/accounts', (req, res) => {
         response.setEncoding('utf8');
         response.on('data', (data) => {
             console.log(`BODY: ${data}`);
+            accountString += data;
         });
         response.on('end', () => {
             console.log('No more data in response');
+            accounts = JSON.parse(accountString);
+            res.json(accounts);
+            
         });
     });
 
@@ -117,10 +123,10 @@ app.get('/accounts', (req, res) => {
         console.error(`problem with request: ${e.message}`);
     });
 
-    request.end()
-    res.send("here");
+    request.end();
+    /*console.log(accounts);
+    res.json(accounts);*/
     
-
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
